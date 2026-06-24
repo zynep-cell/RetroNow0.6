@@ -35,7 +35,7 @@
         }
 
         .sidebar {
-            width: 350px;
+            width: 360px;
             background-color: var(--panel-bg);
             border-right: 1px solid var(--border-color);
             padding: 2rem 1.5rem;
@@ -45,7 +45,6 @@
             overflow-y: auto;
         }
 
-        /* Özel Kaydırma Çubuğu */
         .sidebar::-webkit-scrollbar { width: 6px; }
         .sidebar::-webkit-scrollbar-track { background: var(--bg-color); }
         .sidebar::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 10px; }
@@ -56,7 +55,7 @@
         .btn {
             width: 100%; padding: 0.8rem; border: 1px solid var(--border-color);
             background: transparent; color: var(--text-primary); cursor: pointer;
-            font-size: 0.9rem; letter-spacing: 1px; transition: all 0.3s ease;
+            font-size: 0.85rem; letter-spacing: 1px; transition: all 0.3s ease;
             text-align: center; display: inline-flex; justify-content: center;
             align-items: center; gap: 0.5rem;
         }
@@ -71,7 +70,6 @@
         .history-controls { display: flex; gap: 0.5rem; }
         .history-btn { padding: 0.5rem; font-size: 0.8rem; }
 
-        /* Panel Grupları */
         .panel-section {
             border: 1px solid var(--border-color);
             padding: 1rem;
@@ -81,20 +79,19 @@
             gap: 0.8rem;
         }
 
-        .section-header { font-size: 0.85rem; color: var(--accent-color); letter-spacing: 1px; text-transform: uppercase; }
+        .section-header { font-size: 0.8rem; color: var(--accent-color); letter-spacing: 1px; text-transform: uppercase; }
         
-        /* Hazır Popüler Estetikler Izgarası */
         .preset-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 0.5rem;
         }
-        .preset-quick-btn { padding: 0.5rem; font-size: 0.75rem; text-transform: none; letter-spacing: 0; }
+        .preset-quick-btn { padding: 0.5rem; font-size: 0.7rem; text-transform: none; letter-spacing: 0.5px; border-color: #333; }
 
         .recipe-input {
             width: 100%; padding: 0.5rem; background: var(--bg-color);
             border: 1px solid var(--border-color); color: var(--text-primary);
-            outline: none; font-size: 0.9rem;
+            outline: none; font-size: 0.85rem;
         }
         select.recipe-input { cursor: pointer; }
 
@@ -126,7 +123,7 @@
         #compareHint { font-size: 0.8rem; color: var(--text-secondary); margin-top: 1rem; display: none; letter-spacing: 0.5px; }
 
         .controls-title {
-            font-size: 0.85rem; color: var(--accent-color); border-bottom: 1px solid var(--border-color);
+            font-size: 0.8rem; color: var(--accent-color); border-bottom: 1px solid var(--border-color);
             padding-bottom: 0.5rem; margin-top: 1rem; letter-spacing: 1px;
         }
     </style>
@@ -141,13 +138,16 @@
                 <input type="file" id="imageUpload" accept="image/*" hidden>
             </div>
 
+            <!-- İkonik Kameralar ve Polarr Estetikleri -->
             <div class="panel-section">
-                <div class="section-header">Hazır Estetikler (1980s & Nostalji)</div>
+                <div class="section-header">Analog & Polarr Filtreleri</div>
                 <div class="preset-grid">
-                    <button class="btn preset-quick-btn" data-preset="neon180">1980s Neon Film</button>
+                    <button class="btn preset-quick-btn" data-preset="kodakGold">Kodak Gold 200</button>
+                    <button class="btn preset-quick-btn" data-preset="kodakPortra">Kodak Portra 400</button>
+                    <button class="btn preset-quick-btn" data-preset="polarrMoody">Polarr: Moody Dark</button>
+                    <button class="btn preset-quick-btn" data-preset="polarrTeal">Polarr: Cinematic</button>
                     <button class="btn preset-quick-btn" data-preset="polaroid">Creamy Polaroid</button>
-                    <button class="btn preset-quick-btn" data-preset="lofi">Lo-Fi VHS</button>
-                    <button class="btn preset-quick-btn" data-preset="noir">Noir Cinema</button>
+                    <button class="btn preset-quick-btn" data-preset="lofiVHS">Lo-Fi VHS (Bozuk)</button>
                 </div>
             </div>
 
@@ -172,7 +172,7 @@
                 <button class="btn preset-btn" id="resetBtn">Tümünü Sıfırla</button>
             </div>
 
-            <div class="controls-title">İnce Ayarlar (Sliders)</div>
+            <div class="controls-title">Kamera & Renk Ayarları (Sliders)</div>
             <div class="controls-container" id="controls"></div>
 
             <div class="export-section">
@@ -190,13 +190,13 @@
     </div>
 
     <script>
-        // --- DURUM VE GEÇMİŞ YÖNETİMİ ---
         const state = { image: null, settings: {}, showOriginal: false };
         let history = [];
         let historyIndex = -1;
 
-        // BÜTÜN KAYDIRICILAR VE BAŞLIKLARI
+        // --- GÜNCELLENMİŞ AYAR LİSTESİ (KAMERA KUSURLARI EKLENDİ) ---
         const filterConfig = [
+            // Renk ve Işık
             { id: 'exposure', label: 'Pozlama (Exposure)', min: -100, max: 100, default: 0, unit: '' },
             { id: 'brilliance', label: 'Canlılık (Brilliance)', min: -100, max: 100, default: 0, unit: '' },
             { id: 'highlights', label: 'Parlak Alanlar (Highlights)', min: -100, max: 100, default: 0, unit: '' },
@@ -204,25 +204,32 @@
             { id: 'contrast', label: 'Kontrast (Contrast)', min: -100, max: 100, default: 0, unit: '' },
             { id: 'brightness', label: 'Parlaklık (Brightness)', min: -100, max: 100, default: 0, unit: '' },
             { id: 'saturation', label: 'Doygunluk (Saturation)', min: -100, max: 100, default: 0, unit: '' },
-            { id: 'situation', label: 'Durum (Situation)', min: -100, max: 100, default: 0, unit: '' },
             { id: 'vibrance', label: 'Titreşim (Vibrance)', min: -100, max: 100, default: 0, unit: '' },
-            { id: 'warmth', label: 'Sıcaklık (Warmth / Temp)', min: -100, max: 100, default: 0, unit: '' },
+            { id: 'warmth', label: 'Sıcaklık (Warmth)', min: -100, max: 100, default: 0, unit: '' },
             { id: 'tint', label: 'Renk Tonu (Tint)', min: -100, max: 100, default: 0, unit: '' },
+            { id: 'fade', label: 'Solgunluk (Fade)', min: 0, max: 100, default: 0, unit: '' },
+            { id: 'vintage', label: 'Nostaljik (Vintage)', min: 0, max: 100, default: 0, unit: '' },
+            
+            // Fiziksel Kamera Kusurları (Yeni)
+            { id: 'degradation', label: 'Kamera Eskimesi (Low Res)', min: 0, max: 100, default: 0, unit: '%' },
+            { id: 'grain', label: 'Film Greni (Analog Noise)', min: 0, max: 100, default: 0, unit: '' },
+            { id: 'chromatic', label: 'Lens Sapması (Color Bleed)', min: 0, max: 100, default: 0, unit: '' },
+            { id: 'vignette', label: 'Köşe Karartma (Vignette)', min: 0, max: 100, default: 0, unit: '' },
+            
+            // Keskinlik ve Detay
             { id: 'sharpness', label: 'Keskinlik (Sharpness)', min: 0, max: 100, default: 0, unit: '' },
             { id: 'definition', label: 'Belirginlik (Definition)', min: 0, max: 100, default: 0, unit: '' },
-            { id: 'clarity', label: 'Berraklık (Clarity)', min: -100, max: 100, default: 0, unit: '' },
-            { id: 'noiseReduce', label: 'Gürültü Azaltma (Noise Reduce)', min: 0, max: 100, default: 0, unit: '' },
-            { id: 'vignette', label: 'Köşe Karartma (Vignette)', min: 0, max: 100, default: 0, unit: '' },
-            { id: 'fade', label: 'Solgunluk (Fade)', min: 0, max: 100, default: 0, unit: '' },
-            { id: 'vintage', label: 'Nostaljik (Vintage)', min: 0, max: 100, default: 0, unit: '' }
+            { id: 'clarity', label: 'Berraklık (Clarity)', min: -100, max: 100, default: 0, unit: '' }
         ];
 
-        // HAZIR 1980s & NOSTALJİ REÇETELERİ
+        // İKONİK KAMERA VE POLARR REÇETELERİ
         const builtinPresets = {
-            neon180: { exposure: 10, brilliance: 20, highlights: 5, shadows: -5, contrast: 25, brightness: 5, saturation: 35, situation: 10, vibrance: 20, warmth: 25, tint: 10, sharpness: 15, definition: 10, clarity: 5, noiseReduce: 0, vignette: 20, fade: 10, vintage: 40 },
-            polaroid: { exposure: 15, brilliance: -10, highlights: -25, shadows: 40, contrast: -15, brightness: 10, saturation: -15, situation: -10, vibrance: -10, warmth: 35, tint: -5, sharpness: 0, definition: 0, clarity: -10, noiseReduce: 25, vignette: 35, fade: 50, vintage: 65 },
-            lofi: { exposure: -5, brilliance: 15, highlights: 10, shadows: 15, contrast: 30, brightness: -5, saturation: 20, situation: 5, vibrance: 25, warmth: -15, tint: 20, sharpness: 30, definition: 15, clarity: 20, noiseReduce: 5, vignette: 40, fade: 15, vintage: 30 },
-            noir: { exposure: -10, brilliance: -5, highlights: 20, shadows: -20, contrast: 50, brightness: -10, saturation: -100, situation: -100, vibrance: -100, warmth: 0, tint: 0, sharpness: 40, definition: 50, clarity: 30, noiseReduce: 0, vignette: 65, fade: 20, vintage: 25 }
+            kodakGold: { exposure: 5, brilliance: 10, highlights: -10, shadows: 5, contrast: 15, brightness: 5, saturation: 20, vibrance: 15, warmth: 35, tint: 10, fade: 5, vintage: 25, degradation: 5, grain: 45, chromatic: 10, vignette: 15, sharpness: 10, definition: 5, clarity: 0 },
+            kodakPortra: { exposure: 10, brilliance: 5, highlights: -15, shadows: 15, contrast: -5, brightness: 5, saturation: 5, vibrance: 10, warmth: 15, tint: -5, fade: 10, vintage: 10, degradation: 0, grain: 25, chromatic: 5, vignette: 10, sharpness: 5, definition: 0, clarity: -5 },
+            polarrMoody: { exposure: -15, brilliance: -10, highlights: -30, shadows: -10, contrast: 40, brightness: -10, saturation: -25, vibrance: -10, warmth: -10, tint: 0, fade: 0, vintage: 0, degradation: 0, grain: 10, chromatic: 0, vignette: 50, sharpness: 25, definition: 30, clarity: 20 },
+            polarrTeal: { exposure: 0, brilliance: 15, highlights: 10, shadows: -20, contrast: 30, brightness: 0, saturation: 10, vibrance: 35, warmth: 20, tint: 15, fade: 0, vintage: 5, degradation: 0, grain: 15, chromatic: 5, vignette: 40, sharpness: 20, definition: 15, clarity: 10 },
+            polaroid: { exposure: 15, brilliance: -10, highlights: -25, shadows: 30, contrast: -10, brightness: 10, saturation: -15, vibrance: -10, warmth: 25, tint: -10, fade: 40, vintage: 50, degradation: 15, grain: 35, chromatic: 15, vignette: 35, sharpness: 0, definition: 0, clarity: -10 },
+            lofiVHS: { exposure: -5, brilliance: 10, highlights: 20, shadows: 10, contrast: 30, brightness: 0, saturation: 15, vibrance: 20, warmth: -10, tint: 25, fade: 25, vintage: 40, degradation: 80, grain: 75, chromatic: 60, vignette: 50, sharpness: 30, definition: 20, clarity: 15 }
         };
 
         const uploadInput = document.getElementById('imageUpload');
@@ -234,7 +241,6 @@
         
         const undoBtn = document.getElementById('undoBtn');
         const redoBtn = document.getElementById('redoBtn');
-
         const recipeNameInput = document.getElementById('recipeName');
         const saveRecipeBtn = document.getElementById('saveRecipeBtn');
         const recipeList = document.getElementById('recipeList');
@@ -268,12 +274,16 @@
                 slider.addEventListener('change', () => saveToHistory());
             });
 
-            // Hazır Estetik Butonlarının Tanımlanması
             document.querySelectorAll('.preset-quick-btn').forEach(btn => {
                 btn.addEventListener('click', (e) => {
                     const presetKey = e.target.getAttribute('data-preset');
                     if (builtinPresets[presetKey]) {
-                        state.settings = JSON.parse(JSON.stringify(builtinPresets[presetKey]));
+                        // Reset all first to ensure clean application
+                        filterConfig.forEach(c => state.settings[c.id] = c.default);
+                        // Apply preset
+                        Object.keys(builtinPresets[presetKey]).forEach(k => {
+                            state.settings[k] = builtinPresets[presetKey][k];
+                        });
                         updateSlidersFromState();
                         renderImage();
                         saveToHistory();
@@ -286,30 +296,16 @@
             loadRecipesToDropdown();
         }
 
-        // --- ORİJİNAL KANVAS KILAŞTIRMA (PRESS & HOLD) ---
         function setupCompareEvents() {
-            const startCompare = () => {
-                if (!state.image) return;
-                state.showOriginal = true;
-                renderImage();
-            };
-            const endCompare = () => {
-                if (!state.image) return;
-                state.showOriginal = false;
-                renderImage();
-            };
-
-            // Fare ile kontrol (Masaüstü)
+            const startCompare = () => { if (!state.image) return; state.showOriginal = true; renderImage(); };
+            const endCompare = () => { if (!state.image) return; state.showOriginal = false; renderImage(); };
             canvas.addEventListener('mousedown', startCompare);
             canvas.addEventListener('mouseup', endCompare);
             canvas.addEventListener('mouseleave', endCompare);
-
-            // Dokunmatik kontrol (Mobil / Tablet)
             canvas.addEventListener('touchstart', (e) => { e.preventDefault(); startCompare(); });
             canvas.addEventListener('touchend', (e) => { e.preventDefault(); endCompare(); });
         }
 
-        // --- TARİF DEFTERİ ---
         function loadRecipesToDropdown() {
             const recipes = JSON.parse(localStorage.getItem('retroRecipes')) || {};
             recipeList.innerHTML = '<option value="">Kaydedilmiş Tarif Seç...</option>';
@@ -324,11 +320,9 @@
         saveRecipeBtn.addEventListener('click', () => {
             const name = recipeNameInput.value.trim();
             if (!name) return alert('Lütfen tarifinize bir isim verin.');
-            
             const recipes = JSON.parse(localStorage.getItem('retroRecipes')) || {};
             recipes[name] = JSON.parse(JSON.stringify(state.settings));
             localStorage.setItem('retroRecipes', JSON.stringify(recipes));
-            
             recipeNameInput.value = '';
             loadRecipesToDropdown();
         });
@@ -336,7 +330,6 @@
         loadRecipeBtn.addEventListener('click', () => {
             const name = recipeList.value;
             if (!name) return;
-            
             const recipes = JSON.parse(localStorage.getItem('retroRecipes')) || {};
             if (recipes[name]) {
                 state.settings = JSON.parse(JSON.stringify(recipes[name]));
@@ -349,7 +342,6 @@
         deleteRecipeBtn.addEventListener('click', () => {
             const name = recipeList.value;
             if (!name) return;
-
             const recipes = JSON.parse(localStorage.getItem('retroRecipes')) || {};
             delete recipes[name];
             localStorage.setItem('retroRecipes', JSON.stringify(recipes));
@@ -358,18 +350,16 @@
 
         function updateSlidersFromState() {
             filterConfig.forEach(config => {
-                if (document.getElementById(config.id)) {
-                    document.getElementById(config.id).value = state.settings[config.id];
+                const slider = document.getElementById(config.id);
+                if (slider) {
+                    slider.value = state.settings[config.id];
                     document.getElementById(`${config.id}-val`).innerText = `${state.settings[config.id]}${config.unit}`;
                 }
             });
         }
 
-        // --- GEÇMİŞ YÖNETİMİ (UNDO/REDO) ---
         function saveToHistory() {
-            if (historyIndex < history.length - 1) {
-                history = history.slice(0, historyIndex + 1);
-            }
+            if (historyIndex < history.length - 1) { history = history.slice(0, historyIndex + 1); }
             history.push(JSON.parse(JSON.stringify(state.settings)));
             historyIndex++;
             updateHistoryButtons();
@@ -400,11 +390,9 @@
             }
         });
 
-        // --- FOTOĞRAF GİRİŞİ VE MOTORU ---
         uploadInput.addEventListener('change', (e) => {
             const file = e.target.files[0];
             if (!file) return;
-
             const reader = new FileReader();
             reader.onload = (event) => {
                 const img = new Image();
@@ -428,7 +416,6 @@
             const w = canvas.width;
             const h = canvas.height;
             
-            // Eğer basılı tutuluyorsa filtreleri pas geç ve orijinali render et
             if (state.showOriginal) {
                 ctx.filter = 'none';
                 ctx.globalCompositeOperation = 'source-over';
@@ -439,12 +426,12 @@
 
             const s = state.settings;
             
+            // Renk ve Filtre Hesaplamaları
             const brightness = 100 + s.brightness + s.exposure + (s.highlights * 0.3) + (s.brilliance * 0.2);
             const contrast = 100 + s.contrast + (s.clarity * 0.5) + (s.definition * 0.3) - (s.fade * 0.3);
-            const saturation = 100 + s.saturation + (s.vibrance * 0.5) + (s.situation * 0.2);
+            const saturation = 100 + s.saturation + (s.vibrance * 0.5);
             const sepia = (s.warmth > 0 ? s.warmth : 0) + (s.vintage * 0.5);
             const hueRotate = s.tint; 
-            const blurAmt = s.noiseReduce * 0.05; 
             
             ctx.filter = `
                 brightness(${brightness}%)
@@ -452,19 +439,38 @@
                 saturate(${saturation}%)
                 sepia(${sepia}%)
                 hue-rotate(${hueRotate}deg)
-                blur(${blurAmt}px)
             `;
+
+            // Kamera Eskimesi (Düşük Çözünürlük Simülasyonu)
+            if (s.degradation > 0) {
+                const pixelScale = 1 - (s.degradation / 110); // Pikselleşme oranı
+                const dw = w * pixelScale;
+                const dh = h * pixelScale;
+                
+                const tempCanvas = document.createElement('canvas');
+                tempCanvas.width = dw;
+                tempCanvas.height = dh;
+                const tCtx = tempCanvas.getContext('2d');
+                tCtx.drawImage(state.image, 0, 0, dw, dh);
+                
+                ctx.imageSmoothingEnabled = false; // Pikselli/Kaba görüntü için
+                ctx.globalCompositeOperation = 'source-over';
+                ctx.drawImage(tempCanvas, 0, 0, w, h);
+                ctx.imageSmoothingEnabled = true;
+            } else {
+                ctx.globalCompositeOperation = 'source-over';
+                ctx.drawImage(state.image, 0, 0, w, h);
+            }
             
-            ctx.globalCompositeOperation = 'source-over';
-            ctx.globalAlpha = 1.0;
-            ctx.drawImage(state.image, 0, 0, w, h);
             ctx.filter = 'none';
 
+            // Soğukluk
             if (s.warmth < 0) {
                 ctx.fillStyle = `rgba(0, 100, 255, ${Math.abs(s.warmth) / 500})`;
                 ctx.fillRect(0, 0, w, h);
             }
 
+            // Gölgeler
             if (s.shadows > 0) {
                 ctx.globalCompositeOperation = 'screen';
                 ctx.fillStyle = `rgba(100, 100, 100, ${s.shadows / 300})`;
@@ -475,6 +481,7 @@
                 ctx.fillRect(0, 0, w, h);
             }
 
+            // Solgunluk
             if (s.fade > 0 || s.vintage > 0) {
                 const combinedFade = (s.fade + (s.vintage * 0.5)) / 200;
                 ctx.globalCompositeOperation = 'source-over';
@@ -482,20 +489,59 @@
                 ctx.fillRect(0, 0, w, h);
             }
 
+            // Lens Sapması (Chromatic Aberration - Renk Sızması)
+            if (s.chromatic > 0) {
+                const offset = s.chromatic * (w / 1500);
+                ctx.globalCompositeOperation = 'screen';
+                ctx.globalAlpha = 0.6;
+                ctx.drawImage(canvas, offset, 0);
+                ctx.fillStyle = `rgba(255, 0, 0, 0.3)`;
+                ctx.fillRect(0, 0, w, h);
+                ctx.drawImage(canvas, -offset, 0);
+                ctx.fillStyle = `rgba(0, 200, 255, 0.3)`;
+                ctx.fillRect(0, 0, w, h);
+                ctx.globalAlpha = 1.0;
+            }
+
+            // Köşe Karartma
             if (s.vignette > 0) {
                 const gradient = ctx.createRadialGradient(w/2, h/2, w*0.3, w/2, h/2, w*0.8);
                 gradient.addColorStop(0, 'rgba(0,0,0,0)');
                 gradient.addColorStop(1, `rgba(0,0,0,${s.vignette / 100})`);
                 ctx.globalCompositeOperation = 'multiply';
-                ctx.globalAlpha = 1.0;
                 ctx.fillStyle = gradient;
                 ctx.fillRect(0, 0, w, h);
             }
 
+            // Film Greni (Noise)
+            if (s.grain > 0) {
+                ctx.globalCompositeOperation = 'overlay';
+                ctx.globalAlpha = s.grain / 150;
+                
+                const pCanvas = document.createElement('canvas');
+                pCanvas.width = 150;
+                pCanvas.height = 150;
+                const pCtx = pCanvas.getContext('2d');
+                const imgData = pCtx.createImageData(150, 150);
+                for (let i = 0; i < imgData.data.length; i += 4) {
+                    const noise = Math.random() * 255;
+                    imgData.data[i] = noise;
+                    imgData.data[i+1] = noise;
+                    imgData.data[i+2] = noise;
+                    imgData.data[i+3] = 255;
+                }
+                pCtx.putImageData(imgData, 0, 0);
+                ctx.fillStyle = ctx.createPattern(pCanvas, 'repeat');
+                ctx.fillRect(0, 0, w, h);
+                ctx.globalAlpha = 1.0;
+            }
+
+            // Keskinlik (Sharpness)
             if (s.sharpness > 0) {
                 ctx.globalCompositeOperation = 'overlay';
                 ctx.globalAlpha = s.sharpness / 200;
                 ctx.drawImage(canvas, -1, -1);
+                ctx.globalAlpha = 1.0;
             }
         }
 
@@ -508,9 +554,7 @@
         });
 
         document.getElementById('resetBtn').addEventListener('click', () => {
-            filterConfig.forEach(config => {
-                state.settings[config.id] = config.default;
-            });
+            filterConfig.forEach(c => state.settings[c.id] = c.default);
             updateSlidersFromState();
             renderImage();
             saveToHistory();
