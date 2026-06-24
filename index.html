@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RetroNow 0.6</title>
+    <style>
+        /* --- TASARIM (CSS) --- */
+        :root {
+            --bg-color: #0a0a0a;
+            --panel-bg: #121212;
+            --text-primary: #e0e0e0;
+            --text-secondary: #888888;
+            --accent-color: #ffffff;
+            --border-color: #222222;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .app-container {
+            display: flex;
+            height: 100%;
+        }
+
+        .sidebar {
+            width: 320px;
+            background-color: var(--panel-bg);
+            border-right: 1px solid var(--border-color);
+            padding: 2rem 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            overflow-y: auto;
+        }
+
+        .logo {
+            font-size: 1.2rem;
+            font-weight: 400;
+            letter-spacing: 2px;
+        }
+
+        .version {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+
+        .btn {
+            width: 100%;
+            padding: 0.8rem;
+            border: 1px solid var(--border-color);
+            background: transparent;
+            color: var(--text-primary);
+            cursor: pointer;
+            font-size: 0.9rem;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+            text-align: center;
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn:hover:not(:disabled) {
+            background: var(--accent-color);
+            color: var(--bg-color);
+        }
+
+        .btn:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        .primary-btn { border-color: var(--text-primary); }
+        .export-btn { background: var(--text-primary); color: var(--bg-color); margin-top: auto; }
+        .export-btn:hover { background: #cccccc; }
+
+        .history-controls {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .history-btn { padding: 0.5rem; font-size: 0.8rem; }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .control-header {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        input[type=range] {
+            -webkit-appearance: none;
+            width: 100%;
+            background: transparent;
+        }
+
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 12px;
+            width: 12px;
+            border-radius: 50%;
+            background: var(--accent-color);
+            cursor: pointer;
+            margin-top: -5px;
+        }
+
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 2px;
+            cursor: pointer;
+            background: var(--border-color);
+        }
+
+        .workspace {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+            position: relative;
+        }
+
+        .canvas-wrapper {
+            max-width: 100%;
+            max-height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        canvas {
+            max-width: 100%;
+            max-height: 85vh;
+            object-fit: contain;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+            display: none;
+        }
+
+        #placeholderText {
+            color: var(--text-secondary);
+            letter-spacing: 1px;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <aside class="sidebar">
+            <h1 class="logo">RetroNow <span class="version">0.6</span></h1>
+            
+            <div class="upload-section">
+                <label for="imageUpload" class="btn primary-btn">Fotoğraf Yükle</label>
+                <input type="file" id="imageUpload" accept="image/*" hidden>
+            </div>
+
+            <div class="history-controls">
+                <button class="btn history-btn" id="undoBtn" disabled>&#8592; Geri</button>
+                <button class="btn history-btn" id="redoBtn" disabled>İleri &#8594;</button>
+            </div>
+
+            <div class="controls-container" id="controls"></div>
+
+            <div class="presets-section">
+                <button class="btn preset-btn" id="resetBtn">Tümünü Sıfırla</button>
+            </div>
+
+            <div class="export-section">
+                <button class="btn export-btn" id="downloadBtn">Yüksek Çözünürlüklü İndir</button>
+            </div>
+        </aside>
+
+        <main class="workspace">
+            <div class="canvas-wrapper">
+                <canvas id="photoCanvas"></canvas>
+                <p id="placeholderText">Bir fotoğraf yükleyerek başlayın.</p>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // --- DURUM VE GEÇMİŞ YÖNETİMİ ---
+        const state = { image: null, settings: {} };
+        let history = [];
+        let historyIndex = -1;
+
+        // BİR AYARI KALDIRMAK İSTERSEN: Sadece bu listedeki o satırı sil.
+        const filterConfig = [
+            { id: 'brightness', label: 'Parlaklık', min: 0, max: 200, default: 100, unit: '%' },
+            { id: 'contrast', label: 'Kontrast', min: 0, max: 200, default: 100, unit: '%' },
+            { id: 'saturation', label: 'Doygunluk', min: 0, max: 200, default: 100, unit: '%' },
+            { id: 'exposure', label: 'Pozlama', min: 0, max: 200, default: 100, unit: '%' },
+            { id: 'sepia', label: 'Sıcaklık (Sepia)', min: 0, max: 100, default: 0, unit: '%' },
+            { id: 'fade', label: 'Solgunluk', min: 0, max: 100, default: 0, unit: '%' },
+            { id: 'blur', label: 'Yumuşak Odak', min: 0, max: 10, default: 0, unit: 'px' },
+            { id: 'vignette', label: 'Köşe Karartma', min: 0, max: 100, default: 0, unit: '%' },
+            { id: 'grain', label: 'Film Greni', min: 0, max: 100, default: 0, unit: '%' },
+            { id: 'chromatic', label: 'Kromatik Sapma', min: 0, max: 20, default: 0, unit: 'px' }
+        ];
+
+        const uploadInput = document.getElementById('imageUpload');
+        const canvas = document.getElementById('photoCanvas');
+        const ctx = canvas.getContext('2d');
+        const placeholder = document.getElementById('placeholderText');
+        const controlsContainer = document.getElementById('controls');
+        
+        const undoBtn = document.getElementById('undoBtn');
+        const redoBtn = document.getElementById('redoBtn');
+
+        function initApp() {
+            filterConfig.forEach(config => {
+                state.settings[config.id] = config.default;
+
+                const group = document.createElement('div');
+                group.className = 'control-group';
+                group.innerHTML = `
+                    <div class="control-header">
+                        <span>${config.label}</span>
+                        <span id="${config.id}-val">${config.default}${config.unit}</span>
+                    </div>
+                    <input type="range" id="${config.id}" min="${config.min}" max="${config.max}" value="${config.default}">
+                `;
+                controlsContainer.appendChild(group);
+
+                const slider = document.getElementById(config.id);
+                const valDisplay = document.getElementById(`${config.id}-val`);
+
+                // Kaydırıcı hareket ederken canlı önizleme yapar
+                slider.addEventListener('input', (e) => {
+                    state.settings[config.id] = parseFloat(e.target.value);
+                    valDisplay.innerText = `${e.target.value}${config.unit}`;
+                    renderImage();
+                });
+
+                // Kaydırıcı bırakıldığında geçmişe (hafızaya) kaydeder
+                slider.addEventListener('change', () => saveToHistory());
+            });
+
+            saveToHistory(); // Başlangıç durumunu kaydet
+        }
+
+        // --- GEÇMİŞ (UNDO/REDO) FONKSİYONLARI ---
+        function saveToHistory() {
+            if (historyIndex < history.length - 1) {
+                history = history.slice(0, historyIndex + 1);
+            }
+            history.push(JSON.parse(JSON.stringify(state.settings)));
+            historyIndex++;
+            updateHistoryButtons();
+        }
+
+        function updateHistoryButtons() {
+            undoBtn.disabled = historyIndex <= 0;
+            redoBtn.disabled = historyIndex >= history.length - 1;
+        }
+
+        function applyHistoryState() {
+            state.settings = JSON.parse(JSON.stringify(history[historyIndex]));
+            filterConfig.forEach(config => {
+                if (document.getElementById(config.id)) {
+                    document.getElementById(config.id).value = state.settings[config.id];
+                    document.getElementById(`${config.id}-val`).innerText = `${state.settings[config.id]}${config.unit}`;
+                }
+            });
+            renderImage();
+            updateHistoryButtons();
+        }
+
+        undoBtn.addEventListener('click', () => {
+            if (historyIndex > 0) {
+                historyIndex--;
+                applyHistoryState();
+            }
+        });
+
+        redoBtn.addEventListener('click', () => {
+            if (historyIndex < history.length - 1) {
+                historyIndex++;
+                applyHistoryState();
+            }
+        });
+
+        // --- FOTOĞRAF İŞLEMLERİ ---
+        uploadInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                const img = new Image();
+                img.onload = () => {
+                    state.image = img;
+                    canvas.width = img.width;
+                    canvas.height = img.height;
+                    canvas.style.display = 'block';
+                    placeholder.style.display = 'none';
+                    renderImage();
+                };
+                img.src = event.target.result;
+            };
+            reader.readAsDataURL(file);
+        });
+
+        function renderImage() {
+            if (!state.image) return;
+
+            const w = canvas.width;
+            const h = canvas.height;
+            const s = state.settings;
+            
+            const brightness = s.brightness ? (s.brightness * ((s.exposure || 100) / 100)) : 100;
+            const fadeVal = s.fade || 0;
+            
+            ctx.filter = `
+                brightness(${brightness}%)
+                contrast(${s.contrast ? s.contrast - (fadeVal * 0.3) : 100}%)
+                saturate(${s.saturation !== undefined ? s.saturation : 100}%)
+                sepia(${s.sepia || 0}%)
+                blur(${s.blur || 0}px)
+            `;
+            
+            ctx.globalCompositeOperation = 'source-over';
+            ctx.globalAlpha = 1.0;
+            ctx.drawImage(state.image, 0, 0, w, h);
+            ctx.filter = 'none';
+
+            if (fadeVal > 0) {
+                ctx.fillStyle = `rgba(128, 128, 128, ${(fadeVal / 100) * 0.5})`;
+                ctx.fillRect(0, 0, w, h);
+            }
+
+            if (s.chromatic > 0) {
+                const offset = s.chromatic * (w / 1000);
+                ctx.globalCompositeOperation = 'screen';
+                ctx.globalAlpha = 0.5;
+                ctx.drawImage(canvas, offset, 0);
+                ctx.fillStyle = 'rgba(255, 0, 0, 0.2)';
+                ctx.fillRect(0, 0, w, h);
+                ctx.drawImage(canvas, -offset, 0);
+                ctx.fillStyle = 'rgba(0, 0, 255, 0.2)';
+                ctx.fillRect(0, 0, w, h);
+            }
+
+            if (s.vignette > 0) {
+                const gradient = ctx.createRadialGradient(w/2, h/2, w*0.3, w/2, h/2, w*0.8);
+                gradient.addColorStop(0, 'rgba(0,0,0,0)');
+                gradient.addColorStop(1, `rgba(0,0,0,${s.vignette / 100})`);
+                ctx.globalCompositeOperation = 'multiply';
+                ctx.globalAlpha = 1.0;
+                ctx.fillStyle = gradient;
+                ctx.fillRect(0, 0, w, h);
+            }
+
+            if (s.grain > 0) {
+                ctx.globalCompositeOperation = 'overlay';
+                ctx.globalAlpha = s.grain / 200;
+                const patternCanvas = document.createElement('canvas');
+                patternCanvas.width = 100;
+                patternCanvas.height = 100;
+                const pCtx = patternCanvas.getContext('2d');
+                const imgData = pCtx.createImageData(100, 100);
+                for (let i = 0; i < imgData.data.length; i += 4) {
+                    const noise = Math.random() * 255;
+                    imgData.data[i] = noise;
+                    imgData.data[i+1] = noise;
+                    imgData.data[i+2] = noise;
+                    imgData.data[i+3] = 255;
+                }
+                pCtx.putImageData(imgData, 0, 0);
+                ctx.fillStyle = ctx.createPattern(patternCanvas, 'repeat');
+                ctx.fillRect(0, 0, w, h);
+            }
+        }
+
+        document.getElementById('downloadBtn').addEventListener('click', () => {
+            if (!state.image) return;
+            const link = document.createElement('a');
+            link.download = 'RetroNow_Edit.jpg';
+            link.href = canvas.toDataURL('image/jpeg', 1.0);
+            link.click();
+        });
+
+        document.getElementById('resetBtn').addEventListener('click', () => {
+            filterConfig.forEach(config => {
+                if (document.getElementById(config.id)) {
+                    document.getElementById(config.id).value = config.default;
+                    document.getElementById(`${config.id}-val`).innerText = `${config.default}${config.unit}`;
+                    state.settings[config.id] = config.default;
+                }
+            });
+            renderImage();
+            saveToHistory();
+        });
+
+        initApp();
+    </script>
+</body>
+</html>
