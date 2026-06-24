@@ -71,8 +71,8 @@
         .history-controls { display: flex; gap: 0.5rem; }
         .history-btn { padding: 0.5rem; font-size: 0.8rem; }
 
-        /* Tarif Defteri (Recipe Book) Alanı */
-        .recipe-section {
+        /* Panel Grupları */
+        .panel-section {
             border: 1px solid var(--border-color);
             padding: 1rem;
             border-radius: 4px;
@@ -81,7 +81,16 @@
             gap: 0.8rem;
         }
 
-        .recipe-header { font-size: 0.9rem; color: var(--accent-color); letter-spacing: 1px; text-transform: uppercase; }
+        .section-header { font-size: 0.85rem; color: var(--accent-color); letter-spacing: 1px; text-transform: uppercase; }
+        
+        /* Hazır Popüler Estetikler Izgarası */
+        .preset-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.5rem;
+        }
+        .preset-quick-btn { padding: 0.5rem; font-size: 0.75rem; text-transform: none; letter-spacing: 0; }
+
         .recipe-input {
             width: 100%; padding: 0.5rem; background: var(--bg-color);
             border: 1px solid var(--border-color); color: var(--text-primary);
@@ -105,14 +114,16 @@
             width: 100%; height: 2px; cursor: pointer; background: var(--border-color);
         }
 
-        .workspace { flex: 1; display: flex; justify-content: center; align-items: center; padding: 2rem; position: relative; }
-        .canvas-wrapper { max-width: 100%; max-height: 100%; display: flex; justify-content: center; align-items: center; }
+        .workspace { flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 2rem; position: relative; }
+        .canvas-wrapper { max-width: 100%; max-height: 100%; display: flex; justify-content: center; align-items: center; position: relative; }
         
         canvas {
-            max-width: 100%; max-height: 85vh; object-fit: contain;
+            max-width: 100%; max-height: 80vh; object-fit: contain;
             box-shadow: 0 20px 50px rgba(0,0,0,0.5); display: none;
+            cursor: pointer;
         }
         #placeholderText { color: var(--text-secondary); letter-spacing: 1px; }
+        #compareHint { font-size: 0.8rem; color: var(--text-secondary); margin-top: 1rem; display: none; letter-spacing: 0.5px; }
 
         .controls-title {
             font-size: 0.85rem; color: var(--accent-color); border-bottom: 1px solid var(--border-color);
@@ -130,8 +141,18 @@
                 <input type="file" id="imageUpload" accept="image/*" hidden>
             </div>
 
-            <div class="recipe-section">
-                <div class="recipe-header">Tarif Defteri</div>
+            <div class="panel-section">
+                <div class="section-header">Hazır Estetikler (1980s & Nostalji)</div>
+                <div class="preset-grid">
+                    <button class="btn preset-quick-btn" data-preset="neon180">1980s Neon Film</button>
+                    <button class="btn preset-quick-btn" data-preset="polaroid">Creamy Polaroid</button>
+                    <button class="btn preset-quick-btn" data-preset="lofi">Lo-Fi VHS</button>
+                    <button class="btn preset-quick-btn" data-preset="noir">Noir Cinema</button>
+                </div>
+            </div>
+
+            <div class="panel-section">
+                <div class="section-header">Tarif Defteri</div>
                 <input type="text" id="recipeName" class="recipe-input" placeholder="Tarifine bir isim ver...">
                 <button class="btn" id="saveRecipeBtn">Bu Tarifi Kaydet</button>
                 
@@ -164,15 +185,17 @@
                 <canvas id="photoCanvas"></canvas>
                 <p id="placeholderText">Bir fotoğraf yükleyerek başlayın.</p>
             </div>
+            <p id="compareHint">Orijinal hali görmek için fotoğrafın üzerine basılı tutun.</p>
         </main>
     </div>
 
     <script>
-        const state = { image: null, settings: {} };
+        // --- DURUM VE GEÇMİŞ YÖNETİMİ ---
+        const state = { image: null, settings: {}, showOriginal: false };
         let history = [];
         let historyIndex = -1;
 
-        // --- PINTEREST / IOS AYAR LİSTESİ ---
+        // BÜTÜN KAYDIRICILAR VE BAŞLIKLARI
         const filterConfig = [
             { id: 'exposure', label: 'Pozlama (Exposure)', min: -100, max: 100, default: 0, unit: '' },
             { id: 'brilliance', label: 'Canlılık (Brilliance)', min: -100, max: 100, default: 0, unit: '' },
@@ -194,16 +217,24 @@
             { id: 'vintage', label: 'Nostaljik (Vintage)', min: 0, max: 100, default: 0, unit: '' }
         ];
 
+        // HAZIR 1980s & NOSTALJİ REÇETELERİ
+        const builtinPresets = {
+            neon180: { exposure: 10, brilliance: 20, highlights: 5, shadows: -5, contrast: 25, brightness: 5, saturation: 35, situation: 10, vibrance: 20, warmth: 25, tint: 10, sharpness: 15, definition: 10, clarity: 5, noiseReduce: 0, vignette: 20, fade: 10, vintage: 40 },
+            polaroid: { exposure: 15, brilliance: -10, highlights: -25, shadows: 40, contrast: -15, brightness: 10, saturation: -15, situation: -10, vibrance: -10, warmth: 35, tint: -5, sharpness: 0, definition: 0, clarity: -10, noiseReduce: 25, vignette: 35, fade: 50, vintage: 65 },
+            lofi: { exposure: -5, brilliance: 15, highlights: 10, shadows: 15, contrast: 30, brightness: -5, saturation: 20, situation: 5, vibrance: 25, warmth: -15, tint: 20, sharpness: 30, definition: 15, clarity: 20, noiseReduce: 5, vignette: 40, fade: 15, vintage: 30 },
+            noir: { exposure: -10, brilliance: -5, highlights: 20, shadows: -20, contrast: 50, brightness: -10, saturation: -100, situation: -100, vibrance: -100, warmth: 0, tint: 0, sharpness: 40, definition: 50, clarity: 30, noiseReduce: 0, vignette: 65, fade: 20, vintage: 25 }
+        };
+
         const uploadInput = document.getElementById('imageUpload');
         const canvas = document.getElementById('photoCanvas');
         const ctx = canvas.getContext('2d');
         const placeholder = document.getElementById('placeholderText');
+        const compareHint = document.getElementById('compareHint');
         const controlsContainer = document.getElementById('controls');
         
         const undoBtn = document.getElementById('undoBtn');
         const redoBtn = document.getElementById('redoBtn');
 
-        // Tarif Defteri Elementleri
         const recipeNameInput = document.getElementById('recipeName');
         const saveRecipeBtn = document.getElementById('saveRecipeBtn');
         const recipeList = document.getElementById('recipeList');
@@ -237,11 +268,48 @@
                 slider.addEventListener('change', () => saveToHistory());
             });
 
+            // Hazır Estetik Butonlarının Tanımlanması
+            document.querySelectorAll('.preset-quick-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const presetKey = e.target.getAttribute('data-preset');
+                    if (builtinPresets[presetKey]) {
+                        state.settings = JSON.parse(JSON.stringify(builtinPresets[presetKey]));
+                        updateSlidersFromState();
+                        renderImage();
+                        saveToHistory();
+                    }
+                });
+            });
+
+            setupCompareEvents();
             saveToHistory();
             loadRecipesToDropdown();
         }
 
-        // --- TARİF DEFTERİ (LOCAL STORAGE) ---
+        // --- ORİJİNAL KANVAS KILAŞTIRMA (PRESS & HOLD) ---
+        function setupCompareEvents() {
+            const startCompare = () => {
+                if (!state.image) return;
+                state.showOriginal = true;
+                renderImage();
+            };
+            const endCompare = () => {
+                if (!state.image) return;
+                state.showOriginal = false;
+                renderImage();
+            };
+
+            // Fare ile kontrol (Masaüstü)
+            canvas.addEventListener('mousedown', startCompare);
+            canvas.addEventListener('mouseup', endCompare);
+            canvas.addEventListener('mouseleave', endCompare);
+
+            // Dokunmatik kontrol (Mobil / Tablet)
+            canvas.addEventListener('touchstart', (e) => { e.preventDefault(); startCompare(); });
+            canvas.addEventListener('touchend', (e) => { e.preventDefault(); endCompare(); });
+        }
+
+        // --- TARİF DEFTERİ ---
         function loadRecipesToDropdown() {
             const recipes = JSON.parse(localStorage.getItem('retroRecipes')) || {};
             recipeList.innerHTML = '<option value="">Kaydedilmiş Tarif Seç...</option>';
@@ -263,7 +331,6 @@
             
             recipeNameInput.value = '';
             loadRecipesToDropdown();
-            alert(`"${name}" tarifi kaydedildi!`);
         });
 
         loadRecipeBtn.addEventListener('click', () => {
@@ -287,7 +354,6 @@
             delete recipes[name];
             localStorage.setItem('retroRecipes', JSON.stringify(recipes));
             loadRecipesToDropdown();
-            alert(`"${name}" tarifi silindi.`);
         });
 
         function updateSlidersFromState() {
@@ -299,7 +365,7 @@
             });
         }
 
-        // --- GEÇMİŞ YÖNETİMİ ---
+        // --- GEÇMİŞ YÖNETİMİ (UNDO/REDO) ---
         function saveToHistory() {
             if (historyIndex < history.length - 1) {
                 history = history.slice(0, historyIndex + 1);
@@ -334,7 +400,7 @@
             }
         });
 
-        // --- FOTOĞRAF İŞLEMLERİ ---
+        // --- FOTOĞRAF GİRİŞİ VE MOTORU ---
         uploadInput.addEventListener('change', (e) => {
             const file = e.target.files[0];
             if (!file) return;
@@ -348,6 +414,7 @@
                     canvas.height = img.height;
                     canvas.style.display = 'block';
                     placeholder.style.display = 'none';
+                    compareHint.style.display = 'block';
                     renderImage();
                 };
                 img.src = event.target.result;
@@ -360,15 +427,24 @@
 
             const w = canvas.width;
             const h = canvas.height;
+            
+            // Eğer basılı tutuluyorsa filtreleri pas geç ve orijinali render et
+            if (state.showOriginal) {
+                ctx.filter = 'none';
+                ctx.globalCompositeOperation = 'source-over';
+                ctx.globalAlpha = 1.0;
+                ctx.drawImage(state.image, 0, 0, w, h);
+                return;
+            }
+
             const s = state.settings;
             
-            // Ayarları -100 ile +100 arasından, CSS filtreleri için % değerlerine çeviriyoruz
             const brightness = 100 + s.brightness + s.exposure + (s.highlights * 0.3) + (s.brilliance * 0.2);
             const contrast = 100 + s.contrast + (s.clarity * 0.5) + (s.definition * 0.3) - (s.fade * 0.3);
             const saturation = 100 + s.saturation + (s.vibrance * 0.5) + (s.situation * 0.2);
             const sepia = (s.warmth > 0 ? s.warmth : 0) + (s.vintage * 0.5);
             const hueRotate = s.tint; 
-            const blurAmt = s.noiseReduce * 0.05; // Gürültü azaltmayı hafif bulanıklıkla simüle ediyoruz
+            const blurAmt = s.noiseReduce * 0.05; 
             
             ctx.filter = `
                 brightness(${brightness}%)
@@ -384,13 +460,11 @@
             ctx.drawImage(state.image, 0, 0, w, h);
             ctx.filter = 'none';
 
-            // Soğukluk (Sıcaklık eksiye düşerse mavi ton)
             if (s.warmth < 0) {
                 ctx.fillStyle = `rgba(0, 100, 255, ${Math.abs(s.warmth) / 500})`;
                 ctx.fillRect(0, 0, w, h);
             }
 
-            // Gölgeler (Shadows) - Çok basit bir simülasyon
             if (s.shadows > 0) {
                 ctx.globalCompositeOperation = 'screen';
                 ctx.fillStyle = `rgba(100, 100, 100, ${s.shadows / 300})`;
@@ -401,7 +475,6 @@
                 ctx.fillRect(0, 0, w, h);
             }
 
-            // Solgunluk ve Vintage efekti harmanlaması
             if (s.fade > 0 || s.vintage > 0) {
                 const combinedFade = (s.fade + (s.vintage * 0.5)) / 200;
                 ctx.globalCompositeOperation = 'source-over';
@@ -409,7 +482,6 @@
                 ctx.fillRect(0, 0, w, h);
             }
 
-            // Köşe Karartma (Vignette)
             if (s.vignette > 0) {
                 const gradient = ctx.createRadialGradient(w/2, h/2, w*0.3, w/2, h/2, w*0.8);
                 gradient.addColorStop(0, 'rgba(0,0,0,0)');
@@ -420,7 +492,6 @@
                 ctx.fillRect(0, 0, w, h);
             }
 
-            // Keskinlik (Sharpness) simülasyonu: Resmi hafif kaydırarak ve kontrast uygulayarak üst üste bindirme
             if (s.sharpness > 0) {
                 ctx.globalCompositeOperation = 'overlay';
                 ctx.globalAlpha = s.sharpness / 200;
