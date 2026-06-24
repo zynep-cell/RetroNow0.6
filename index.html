@@ -35,7 +35,7 @@
         }
 
         .sidebar {
-            width: 320px;
+            width: 350px;
             background-color: var(--panel-bg);
             border-right: 1px solid var(--border-color);
             padding: 2rem 1.5rem;
@@ -45,122 +45,78 @@
             overflow-y: auto;
         }
 
-        .logo {
-            font-size: 1.2rem;
-            font-weight: 400;
-            letter-spacing: 2px;
-        }
+        /* Özel Kaydırma Çubuğu */
+        .sidebar::-webkit-scrollbar { width: 6px; }
+        .sidebar::-webkit-scrollbar-track { background: var(--bg-color); }
+        .sidebar::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 10px; }
 
-        .version {
-            font-size: 0.8rem;
-            color: var(--text-secondary);
-        }
+        .logo { font-size: 1.2rem; font-weight: 400; letter-spacing: 2px; }
+        .version { font-size: 0.8rem; color: var(--text-secondary); }
 
         .btn {
-            width: 100%;
-            padding: 0.8rem;
-            border: 1px solid var(--border-color);
-            background: transparent;
-            color: var(--text-primary);
-            cursor: pointer;
-            font-size: 0.9rem;
-            letter-spacing: 1px;
-            transition: all 0.3s ease;
-            text-align: center;
-            display: inline-flex;
-            justify-content: center;
-            align-items: center;
-            gap: 0.5rem;
+            width: 100%; padding: 0.8rem; border: 1px solid var(--border-color);
+            background: transparent; color: var(--text-primary); cursor: pointer;
+            font-size: 0.9rem; letter-spacing: 1px; transition: all 0.3s ease;
+            text-align: center; display: inline-flex; justify-content: center;
+            align-items: center; gap: 0.5rem;
         }
 
-        .btn:hover:not(:disabled) {
-            background: var(--accent-color);
-            color: var(--bg-color);
-        }
-
-        .btn:disabled {
-            opacity: 0.3;
-            cursor: not-allowed;
-        }
+        .btn:hover:not(:disabled) { background: var(--accent-color); color: var(--bg-color); }
+        .btn:disabled { opacity: 0.3; cursor: not-allowed; }
 
         .primary-btn { border-color: var(--text-primary); }
         .export-btn { background: var(--text-primary); color: var(--bg-color); margin-top: auto; }
         .export-btn:hover { background: #cccccc; }
 
-        .history-controls {
-            display: flex;
-            gap: 0.5rem;
-        }
-
+        .history-controls { display: flex; gap: 0.5rem; }
         .history-btn { padding: 0.5rem; font-size: 0.8rem; }
 
-        .control-group {
+        /* Tarif Defteri (Recipe Book) Alanı */
+        .recipe-section {
+            border: 1px solid var(--border-color);
+            padding: 1rem;
+            border-radius: 4px;
             display: flex;
             flex-direction: column;
-            gap: 0.5rem;
-            margin-bottom: 1rem;
+            gap: 0.8rem;
         }
 
+        .recipe-header { font-size: 0.9rem; color: var(--accent-color); letter-spacing: 1px; text-transform: uppercase; }
+        .recipe-input {
+            width: 100%; padding: 0.5rem; background: var(--bg-color);
+            border: 1px solid var(--border-color); color: var(--text-primary);
+            outline: none; font-size: 0.9rem;
+        }
+        select.recipe-input { cursor: pointer; }
+
+        .control-group { display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 1rem; }
         .control-header {
-            display: flex;
-            justify-content: space-between;
-            font-size: 0.8rem;
-            color: var(--text-secondary);
-            text-transform: uppercase;
-            letter-spacing: 1px;
+            display: flex; justify-content: space-between; font-size: 0.75rem;
+            color: var(--text-secondary); text-transform: uppercase; letter-spacing: 1px;
         }
 
-        input[type=range] {
-            -webkit-appearance: none;
-            width: 100%;
-            background: transparent;
-        }
-
+        input[type=range] { -webkit-appearance: none; width: 100%; background: transparent; }
         input[type=range]::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            height: 12px;
-            width: 12px;
-            border-radius: 50%;
-            background: var(--accent-color);
-            cursor: pointer;
-            margin-top: -5px;
+            -webkit-appearance: none; height: 12px; width: 12px;
+            border-radius: 50%; background: var(--accent-color);
+            cursor: pointer; margin-top: -5px;
         }
-
         input[type=range]::-webkit-slider-runnable-track {
-            width: 100%;
-            height: 2px;
-            cursor: pointer;
-            background: var(--border-color);
+            width: 100%; height: 2px; cursor: pointer; background: var(--border-color);
         }
 
-        .workspace {
-            flex: 1;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 2rem;
-            position: relative;
-        }
-
-        .canvas-wrapper {
-            max-width: 100%;
-            max-height: 100%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-
+        .workspace { flex: 1; display: flex; justify-content: center; align-items: center; padding: 2rem; position: relative; }
+        .canvas-wrapper { max-width: 100%; max-height: 100%; display: flex; justify-content: center; align-items: center; }
+        
         canvas {
-            max-width: 100%;
-            max-height: 85vh;
-            object-fit: contain;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
-            display: none;
+            max-width: 100%; max-height: 85vh; object-fit: contain;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5); display: none;
         }
+        #placeholderText { color: var(--text-secondary); letter-spacing: 1px; }
 
-        #placeholderText {
-            color: var(--text-secondary);
-            letter-spacing: 1px;
+        .controls-title {
+            font-size: 0.85rem; color: var(--accent-color); border-bottom: 1px solid var(--border-color);
+            padding-bottom: 0.5rem; margin-top: 1rem; letter-spacing: 1px;
         }
     </style>
 </head>
@@ -174,16 +130,29 @@
                 <input type="file" id="imageUpload" accept="image/*" hidden>
             </div>
 
+            <div class="recipe-section">
+                <div class="recipe-header">Tarif Defteri</div>
+                <input type="text" id="recipeName" class="recipe-input" placeholder="Tarifine bir isim ver...">
+                <button class="btn" id="saveRecipeBtn">Bu Tarifi Kaydet</button>
+                
+                <select id="recipeList" class="recipe-input">
+                    <option value="">Kaydedilmiş Tarif Seç...</option>
+                </select>
+                <button class="btn" id="loadRecipeBtn">Seçili Tarifi Uygula</button>
+                <button class="btn" id="deleteRecipeBtn" style="border-color: #552222; color: #ff8888;">Tarifi Sil</button>
+            </div>
+
             <div class="history-controls">
                 <button class="btn history-btn" id="undoBtn" disabled>&#8592; Geri</button>
                 <button class="btn history-btn" id="redoBtn" disabled>İleri &#8594;</button>
             </div>
 
-            <div class="controls-container" id="controls"></div>
-
             <div class="presets-section">
                 <button class="btn preset-btn" id="resetBtn">Tümünü Sıfırla</button>
             </div>
+
+            <div class="controls-title">İnce Ayarlar (Sliders)</div>
+            <div class="controls-container" id="controls"></div>
 
             <div class="export-section">
                 <button class="btn export-btn" id="downloadBtn">Yüksek Çözünürlüklü İndir</button>
@@ -199,23 +168,30 @@
     </div>
 
     <script>
-        // --- DURUM VE GEÇMİŞ YÖNETİMİ ---
         const state = { image: null, settings: {} };
         let history = [];
         let historyIndex = -1;
 
-        // BİR AYARI KALDIRMAK İSTERSEN: Sadece bu listedeki o satırı sil.
+        // --- PINTEREST / IOS AYAR LİSTESİ ---
         const filterConfig = [
-            { id: 'brightness', label: 'Parlaklık', min: 0, max: 200, default: 100, unit: '%' },
-            { id: 'contrast', label: 'Kontrast', min: 0, max: 200, default: 100, unit: '%' },
-            { id: 'saturation', label: 'Doygunluk', min: 0, max: 200, default: 100, unit: '%' },
-            { id: 'exposure', label: 'Pozlama', min: 0, max: 200, default: 100, unit: '%' },
-            { id: 'sepia', label: 'Sıcaklık (Sepia)', min: 0, max: 100, default: 0, unit: '%' },
-            { id: 'fade', label: 'Solgunluk', min: 0, max: 100, default: 0, unit: '%' },
-            { id: 'blur', label: 'Yumuşak Odak', min: 0, max: 10, default: 0, unit: 'px' },
-            { id: 'vignette', label: 'Köşe Karartma', min: 0, max: 100, default: 0, unit: '%' },
-            { id: 'grain', label: 'Film Greni', min: 0, max: 100, default: 0, unit: '%' },
-            { id: 'chromatic', label: 'Kromatik Sapma', min: 0, max: 20, default: 0, unit: 'px' }
+            { id: 'exposure', label: 'Pozlama (Exposure)', min: -100, max: 100, default: 0, unit: '' },
+            { id: 'brilliance', label: 'Canlılık (Brilliance)', min: -100, max: 100, default: 0, unit: '' },
+            { id: 'highlights', label: 'Parlak Alanlar (Highlights)', min: -100, max: 100, default: 0, unit: '' },
+            { id: 'shadows', label: 'Gölgeler (Shadows)', min: -100, max: 100, default: 0, unit: '' },
+            { id: 'contrast', label: 'Kontrast (Contrast)', min: -100, max: 100, default: 0, unit: '' },
+            { id: 'brightness', label: 'Parlaklık (Brightness)', min: -100, max: 100, default: 0, unit: '' },
+            { id: 'saturation', label: 'Doygunluk (Saturation)', min: -100, max: 100, default: 0, unit: '' },
+            { id: 'situation', label: 'Durum (Situation)', min: -100, max: 100, default: 0, unit: '' },
+            { id: 'vibrance', label: 'Titreşim (Vibrance)', min: -100, max: 100, default: 0, unit: '' },
+            { id: 'warmth', label: 'Sıcaklık (Warmth / Temp)', min: -100, max: 100, default: 0, unit: '' },
+            { id: 'tint', label: 'Renk Tonu (Tint)', min: -100, max: 100, default: 0, unit: '' },
+            { id: 'sharpness', label: 'Keskinlik (Sharpness)', min: 0, max: 100, default: 0, unit: '' },
+            { id: 'definition', label: 'Belirginlik (Definition)', min: 0, max: 100, default: 0, unit: '' },
+            { id: 'clarity', label: 'Berraklık (Clarity)', min: -100, max: 100, default: 0, unit: '' },
+            { id: 'noiseReduce', label: 'Gürültü Azaltma (Noise Reduce)', min: 0, max: 100, default: 0, unit: '' },
+            { id: 'vignette', label: 'Köşe Karartma (Vignette)', min: 0, max: 100, default: 0, unit: '' },
+            { id: 'fade', label: 'Solgunluk (Fade)', min: 0, max: 100, default: 0, unit: '' },
+            { id: 'vintage', label: 'Nostaljik (Vintage)', min: 0, max: 100, default: 0, unit: '' }
         ];
 
         const uploadInput = document.getElementById('imageUpload');
@@ -226,6 +202,13 @@
         
         const undoBtn = document.getElementById('undoBtn');
         const redoBtn = document.getElementById('redoBtn');
+
+        // Tarif Defteri Elementleri
+        const recipeNameInput = document.getElementById('recipeName');
+        const saveRecipeBtn = document.getElementById('saveRecipeBtn');
+        const recipeList = document.getElementById('recipeList');
+        const loadRecipeBtn = document.getElementById('loadRecipeBtn');
+        const deleteRecipeBtn = document.getElementById('deleteRecipeBtn');
 
         function initApp() {
             filterConfig.forEach(config => {
@@ -245,21 +228,78 @@
                 const slider = document.getElementById(config.id);
                 const valDisplay = document.getElementById(`${config.id}-val`);
 
-                // Kaydırıcı hareket ederken canlı önizleme yapar
                 slider.addEventListener('input', (e) => {
                     state.settings[config.id] = parseFloat(e.target.value);
                     valDisplay.innerText = `${e.target.value}${config.unit}`;
                     renderImage();
                 });
 
-                // Kaydırıcı bırakıldığında geçmişe (hafızaya) kaydeder
                 slider.addEventListener('change', () => saveToHistory());
             });
 
-            saveToHistory(); // Başlangıç durumunu kaydet
+            saveToHistory();
+            loadRecipesToDropdown();
         }
 
-        // --- GEÇMİŞ (UNDO/REDO) FONKSİYONLARI ---
+        // --- TARİF DEFTERİ (LOCAL STORAGE) ---
+        function loadRecipesToDropdown() {
+            const recipes = JSON.parse(localStorage.getItem('retroRecipes')) || {};
+            recipeList.innerHTML = '<option value="">Kaydedilmiş Tarif Seç...</option>';
+            for (const name in recipes) {
+                const option = document.createElement('option');
+                option.value = name;
+                option.innerText = name;
+                recipeList.appendChild(option);
+            }
+        }
+
+        saveRecipeBtn.addEventListener('click', () => {
+            const name = recipeNameInput.value.trim();
+            if (!name) return alert('Lütfen tarifinize bir isim verin.');
+            
+            const recipes = JSON.parse(localStorage.getItem('retroRecipes')) || {};
+            recipes[name] = JSON.parse(JSON.stringify(state.settings));
+            localStorage.setItem('retroRecipes', JSON.stringify(recipes));
+            
+            recipeNameInput.value = '';
+            loadRecipesToDropdown();
+            alert(`"${name}" tarifi kaydedildi!`);
+        });
+
+        loadRecipeBtn.addEventListener('click', () => {
+            const name = recipeList.value;
+            if (!name) return;
+            
+            const recipes = JSON.parse(localStorage.getItem('retroRecipes')) || {};
+            if (recipes[name]) {
+                state.settings = JSON.parse(JSON.stringify(recipes[name]));
+                updateSlidersFromState();
+                renderImage();
+                saveToHistory();
+            }
+        });
+
+        deleteRecipeBtn.addEventListener('click', () => {
+            const name = recipeList.value;
+            if (!name) return;
+
+            const recipes = JSON.parse(localStorage.getItem('retroRecipes')) || {};
+            delete recipes[name];
+            localStorage.setItem('retroRecipes', JSON.stringify(recipes));
+            loadRecipesToDropdown();
+            alert(`"${name}" tarifi silindi.`);
+        });
+
+        function updateSlidersFromState() {
+            filterConfig.forEach(config => {
+                if (document.getElementById(config.id)) {
+                    document.getElementById(config.id).value = state.settings[config.id];
+                    document.getElementById(`${config.id}-val`).innerText = `${state.settings[config.id]}${config.unit}`;
+                }
+            });
+        }
+
+        // --- GEÇMİŞ YÖNETİMİ ---
         function saveToHistory() {
             if (historyIndex < history.length - 1) {
                 history = history.slice(0, historyIndex + 1);
@@ -274,29 +314,23 @@
             redoBtn.disabled = historyIndex >= history.length - 1;
         }
 
-        function applyHistoryState() {
-            state.settings = JSON.parse(JSON.stringify(history[historyIndex]));
-            filterConfig.forEach(config => {
-                if (document.getElementById(config.id)) {
-                    document.getElementById(config.id).value = state.settings[config.id];
-                    document.getElementById(`${config.id}-val`).innerText = `${state.settings[config.id]}${config.unit}`;
-                }
-            });
-            renderImage();
-            updateHistoryButtons();
-        }
-
         undoBtn.addEventListener('click', () => {
             if (historyIndex > 0) {
                 historyIndex--;
-                applyHistoryState();
+                state.settings = JSON.parse(JSON.stringify(history[historyIndex]));
+                updateSlidersFromState();
+                renderImage();
+                updateHistoryButtons();
             }
         });
 
         redoBtn.addEventListener('click', () => {
             if (historyIndex < history.length - 1) {
                 historyIndex++;
-                applyHistoryState();
+                state.settings = JSON.parse(JSON.stringify(history[historyIndex]));
+                updateSlidersFromState();
+                renderImage();
+                updateHistoryButtons();
             }
         });
 
@@ -328,15 +362,21 @@
             const h = canvas.height;
             const s = state.settings;
             
-            const brightness = s.brightness ? (s.brightness * ((s.exposure || 100) / 100)) : 100;
-            const fadeVal = s.fade || 0;
+            // Ayarları -100 ile +100 arasından, CSS filtreleri için % değerlerine çeviriyoruz
+            const brightness = 100 + s.brightness + s.exposure + (s.highlights * 0.3) + (s.brilliance * 0.2);
+            const contrast = 100 + s.contrast + (s.clarity * 0.5) + (s.definition * 0.3) - (s.fade * 0.3);
+            const saturation = 100 + s.saturation + (s.vibrance * 0.5) + (s.situation * 0.2);
+            const sepia = (s.warmth > 0 ? s.warmth : 0) + (s.vintage * 0.5);
+            const hueRotate = s.tint; 
+            const blurAmt = s.noiseReduce * 0.05; // Gürültü azaltmayı hafif bulanıklıkla simüle ediyoruz
             
             ctx.filter = `
                 brightness(${brightness}%)
-                contrast(${s.contrast ? s.contrast - (fadeVal * 0.3) : 100}%)
-                saturate(${s.saturation !== undefined ? s.saturation : 100}%)
-                sepia(${s.sepia || 0}%)
-                blur(${s.blur || 0}px)
+                contrast(${contrast}%)
+                saturate(${saturation}%)
+                sepia(${sepia}%)
+                hue-rotate(${hueRotate}deg)
+                blur(${blurAmt}px)
             `;
             
             ctx.globalCompositeOperation = 'source-over';
@@ -344,23 +384,32 @@
             ctx.drawImage(state.image, 0, 0, w, h);
             ctx.filter = 'none';
 
-            if (fadeVal > 0) {
-                ctx.fillStyle = `rgba(128, 128, 128, ${(fadeVal / 100) * 0.5})`;
+            // Soğukluk (Sıcaklık eksiye düşerse mavi ton)
+            if (s.warmth < 0) {
+                ctx.fillStyle = `rgba(0, 100, 255, ${Math.abs(s.warmth) / 500})`;
                 ctx.fillRect(0, 0, w, h);
             }
 
-            if (s.chromatic > 0) {
-                const offset = s.chromatic * (w / 1000);
+            // Gölgeler (Shadows) - Çok basit bir simülasyon
+            if (s.shadows > 0) {
                 ctx.globalCompositeOperation = 'screen';
-                ctx.globalAlpha = 0.5;
-                ctx.drawImage(canvas, offset, 0);
-                ctx.fillStyle = 'rgba(255, 0, 0, 0.2)';
+                ctx.fillStyle = `rgba(100, 100, 100, ${s.shadows / 300})`;
                 ctx.fillRect(0, 0, w, h);
-                ctx.drawImage(canvas, -offset, 0);
-                ctx.fillStyle = 'rgba(0, 0, 255, 0.2)';
+            } else if (s.shadows < 0) {
+                ctx.globalCompositeOperation = 'multiply';
+                ctx.fillStyle = `rgba(0, 0, 0, ${Math.abs(s.shadows) / 500})`;
                 ctx.fillRect(0, 0, w, h);
             }
 
+            // Solgunluk ve Vintage efekti harmanlaması
+            if (s.fade > 0 || s.vintage > 0) {
+                const combinedFade = (s.fade + (s.vintage * 0.5)) / 200;
+                ctx.globalCompositeOperation = 'source-over';
+                ctx.fillStyle = `rgba(110, 100, 90, ${combinedFade})`;
+                ctx.fillRect(0, 0, w, h);
+            }
+
+            // Köşe Karartma (Vignette)
             if (s.vignette > 0) {
                 const gradient = ctx.createRadialGradient(w/2, h/2, w*0.3, w/2, h/2, w*0.8);
                 gradient.addColorStop(0, 'rgba(0,0,0,0)');
@@ -371,24 +420,11 @@
                 ctx.fillRect(0, 0, w, h);
             }
 
-            if (s.grain > 0) {
+            // Keskinlik (Sharpness) simülasyonu: Resmi hafif kaydırarak ve kontrast uygulayarak üst üste bindirme
+            if (s.sharpness > 0) {
                 ctx.globalCompositeOperation = 'overlay';
-                ctx.globalAlpha = s.grain / 200;
-                const patternCanvas = document.createElement('canvas');
-                patternCanvas.width = 100;
-                patternCanvas.height = 100;
-                const pCtx = patternCanvas.getContext('2d');
-                const imgData = pCtx.createImageData(100, 100);
-                for (let i = 0; i < imgData.data.length; i += 4) {
-                    const noise = Math.random() * 255;
-                    imgData.data[i] = noise;
-                    imgData.data[i+1] = noise;
-                    imgData.data[i+2] = noise;
-                    imgData.data[i+3] = 255;
-                }
-                pCtx.putImageData(imgData, 0, 0);
-                ctx.fillStyle = ctx.createPattern(patternCanvas, 'repeat');
-                ctx.fillRect(0, 0, w, h);
+                ctx.globalAlpha = s.sharpness / 200;
+                ctx.drawImage(canvas, -1, -1);
             }
         }
 
@@ -402,12 +438,9 @@
 
         document.getElementById('resetBtn').addEventListener('click', () => {
             filterConfig.forEach(config => {
-                if (document.getElementById(config.id)) {
-                    document.getElementById(config.id).value = config.default;
-                    document.getElementById(`${config.id}-val`).innerText = `${config.default}${config.unit}`;
-                    state.settings[config.id] = config.default;
-                }
+                state.settings[config.id] = config.default;
             });
+            updateSlidersFromState();
             renderImage();
             saveToHistory();
         });
